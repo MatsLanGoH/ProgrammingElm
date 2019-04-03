@@ -5,3 +5,9 @@ repl-temp-*
 
 # Book source code directory
 code
+
+# Compiled .js
+*.js
+
+# File system
+.DS_Store
