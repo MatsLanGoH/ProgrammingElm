@@ -1,6 +1,7 @@
 module Picshare exposing (main)
 
 import Browser
+import Http
 import Html exposing (..)
 import Html.Attributes exposing (class, disabled, placeholder, src, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
@@ -40,6 +41,7 @@ type Msg
     = ToggleLike
     | UpdateComment String
     | SaveComment
+    | LoadFeed (Result Http.Error Photo)
 
 initialModel : Model
 initialModel =
@@ -50,6 +52,17 @@ initialModel =
     , comments = [ "Cowabunga, dude!", "Magnificent!" ]
     , newComment = ""
     }
+
+init : () -> ( Model, Cmd Msg )
+init () =
+    ( initialModel, fetchFeed )
+
+fetchFeed : Cmd Msg
+fetchFeed =
+    Http.get
+        { url = baseUrl ++ "feed/1"
+        , expect = Http.expectJson LoadFeed photoDecoder
+        }
 
 viewLoveButton : Model -> Html Msg
 viewLoveButton model =
@@ -142,20 +155,33 @@ view model =
         ]
 
 update :
-    Msg -> Model -> Model
+    Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ToggleLike ->
-            { model | liked = not model.liked }
+            ( { model | liked = not model.liked }
+            , Cmd.none
+            )
         UpdateComment comment ->
-            { model | newComment = comment }
+            ( { model | newComment = comment }
+            , Cmd.none
+            )
         SaveComment ->
-            saveNewComment model
+            ( saveNewComment model
+            , Cmd.none
+            )
+        LoadFeed _ ->
+            ( model, Cmd.none )
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 main : Program () Model Msg
 main =
-    Browser.sandbox
-        { init = initialModel
+    Browser.element
+        { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
         }
