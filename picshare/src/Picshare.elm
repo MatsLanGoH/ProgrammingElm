@@ -2,8 +2,8 @@ module Picshare exposing (main)
 
 import Browser
 import Html exposing (..)
-import Html.Attributes exposing (class, placeholder, src, type_)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, disabled, placeholder, src, type_, value)
+import Html.Events exposing (onClick, onInput, onSubmit)
 
 baseUrl : String
 baseUrl =
@@ -17,12 +17,17 @@ type alias Model =
     , newComment : String
     }
 
+type Msg
+    = ToggleLike
+    | UpdateComment String
+    | SaveComment
+
 initialModel : Model
 initialModel =
     { url = baseUrl ++ "1.jpg"
     , caption = "Surfing"
     , liked = False
-    , comments = [ "Cowabunga, dude!" ]
+    , comments = [ "Cowabunga, dude!", "Magnificent!" ]
     , newComment = ""
     }
 
@@ -77,15 +82,35 @@ viewComments : Model -> Html Msg
 viewComments model =
     div []
         [ viewCommentList model.comments
-        , form [ class "new-comment" ]
+        , form [ class "new-comment", onSubmit SaveComment ]
             [ input
                 [ type_ "text"
                 , placeholder "Add a comment..."
+                , value model.newComment
+                , onInput UpdateComment
                 ]
                 []
-            , button [] [ text "Save" ]
+            , button
+                [ disabled (String.isEmpty model.newComment) ]
+                [ text "Save" ]
             ]
         ]
+
+saveNewComment : Model -> Model
+saveNewComment model =
+    let
+        comment =
+            String.trim model.newComment
+    in
+    case comment of
+        "" ->
+            model
+
+        _ ->
+            { model
+                | comments = model.comments ++ [ comment ] -- Append comment to comments
+                , newComment = "" -- Reset newComment placeholder to empty string
+            }
 
 view : Model -> Html Msg
 view model =
@@ -96,15 +121,16 @@ view model =
             [ viewDetailedPhoto model ]
         ]
 
-type Msg
-    = ToggleLike
-
 update :
     Msg -> Model -> Model
 update msg model =
     case msg of
         ToggleLike ->
             { model | liked = not model.liked }
+        UpdateComment comment ->
+            { model | newComment = comment }
+        SaveComment ->
+            saveNewComment model
 
 main : Program () Model Msg
 main =
