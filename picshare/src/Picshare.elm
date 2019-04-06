@@ -46,15 +46,7 @@ type Msg
 
 initialModel : Model
 initialModel =
-    { photo =
-        Just
-            { id = 1
-            , url = baseUrl ++ "1.jpg"
-            , caption = "Surfing"
-            , liked = False
-            , comments = [ "Cowabunga, dude!", "Magnificent!" ]
-            , newComment = ""
-            }
+    { photo = Nothing
     }
 
 init : () -> ( Model, Cmd Msg )
@@ -156,7 +148,8 @@ viewFeed maybePhoto =
             viewDetailedPhoto photo
 
         Nothing ->
-            text ""
+            div [ class "loading-feed" ]
+                [ text "Loading Feed..." ]
 
 view : Model -> Html Msg
 view model =
@@ -200,7 +193,12 @@ update msg model =
               }
             , Cmd.none
             )
-        LoadFeed _ ->
+        LoadFeed (Ok photo) ->
+            ( { model | photo = Just photo }
+            , Cmd.none
+            )
+
+        LoadFeed (Err _) ->
             ( model, Cmd.none )
 
 subscriptions : Model -> Sub Msg
