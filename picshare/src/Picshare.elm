@@ -29,6 +29,7 @@ type alias Feed =
 
 type alias Model =
     { feed : Maybe Feed
+    , error : Maybe Http.Error
     }
 
 photoDecoder : Decoder Photo
@@ -50,6 +51,7 @@ type Msg
 initialModel : Model
 initialModel =
     { feed = Nothing
+    , error = Nothing
     }
 
 init : () -> ( Model, Cmd Msg )
@@ -144,6 +146,27 @@ saveNewComment photo =
                 , newComment = "" -- Reset newComment placeholder to empty string
             }
 
+errorMessage : Http.Error -> String
+errorMessage error =
+    case error of
+        Http.BadBody _ ->
+            """Sorry, we couldn't load your feed at this time.
+            We're working on it!"""
+
+        _ ->
+            """Sorry, we couldn't load your feed at this time.
+            Please try again later."""
+
+viewContent : Model -> Html Msg
+viewContent model =
+    case model.error of
+        Just error ->
+            div [ class "feed-error" ]
+                [ text (errorMessage error) ]
+
+        Nothing ->
+            viewFeed model.feed
+
 viewFeed : Maybe Feed -> Html Msg
 viewFeed maybeFeed =
     case maybeFeed of
@@ -160,7 +183,7 @@ view model =
         [ div [ class "header" ]
             [ h1 [] [ text "Picshare" ] ]
         , div [ class "content-flow" ]
-            [ viewFeed model.feed ]
+            [ viewContent model ]
         ]
 
 toggleLike : Photo -> Photo
@@ -214,8 +237,8 @@ update msg model =
             , Cmd.none
             )
 
-        LoadFeed (Err _) ->
-            ( model, Cmd.none )
+        LoadFeed (Err error) ->
+            ( { model | error = Just error }, Cmd.none )
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
