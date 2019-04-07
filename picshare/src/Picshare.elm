@@ -2,6 +2,7 @@ module Picshare exposing (main)
 
 import Browser
 import Http
+import WebSocket
 import Html exposing (..)
 import Html.Attributes exposing (class, disabled, placeholder, src, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
@@ -11,6 +12,10 @@ import Json.Decode.Pipeline exposing (hardcoded, required)
 baseUrl : String
 baseUrl =
     "https://programming-elm.com/"
+
+wsUrl : String
+wsUrl =
+    "wss://programming-elm.com/"
 
 type alias Id =
     Int
@@ -47,6 +52,7 @@ type Msg
     | UpdateComment Id String
     | SaveComment Id
     | LoadFeed (Result Http.Error Feed)
+    | LoadStreamPhoto String
 
 initialModel : Model
 initialModel =
@@ -234,15 +240,21 @@ update msg model =
             )
         LoadFeed (Ok feed) ->
             ( { model | feed = Just feed }
-            , Cmd.none
+            , WebSocket.listen wsUrl
             )
-
         LoadFeed (Err error) ->
             ( { model | error = Just error }, Cmd.none )
+        LoadStreamPhoto data ->
+            let
+                _ =
+                    Debug.log "WebSocket data" data
+                in
+                ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    WebSocket.receive LoadStreamPhoto
 
 main : Program () Model Msg
 main =
