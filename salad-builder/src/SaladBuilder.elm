@@ -277,6 +277,28 @@ viewSelectDressing currentDressing =
         , viewDressingOption "Oil and Vinegar" OilVinegar
         ]
 
+viewTextInput : String -> String -> (String -> msg) -> Html msg
+viewTextInput inputLabel inputValue tagger =
+    div [ class "text-input" ]
+        [ label []
+            [ div [] [ text inputLabel ]
+            , input
+                [ type_ "text"
+                , value inputValue
+                , onInput tagger
+                ]
+                []
+            ]
+        ]
+
+viewContact : Contact a -> Html ContactMsg
+viewContact contact =
+    div []
+        [ viewTextInput "Name:" contact.name SetName
+        , viewTextInput "Email:" contact.email SetEmail
+        , viewTextInput "Phone:" contact.phone SetPhone
+        ]
+
 viewBuild : Model -> Html Msg
 viewBuild model =
     div []
@@ -291,39 +313,7 @@ viewBuild model =
         , viewSection "3. Select Dressing"
             [ viewSelectDressing model.salad.dressing ]
         , viewSection "4. Enter Contact Info"
-            [ div [ class "text-input" ]
-                [ label []
-                    [ div [] [ text "Name:" ]
-                    , input
-                        [ type_ "text"
-                        , value model.name
-                        , onInput (ContactMsg << SetName)
-                        ]
-                        []
-                    ]
-                ]
-            , div [ class "text-input" ]
-                [ label []
-                    [ div [] [ text "Email:" ]
-                    , input
-                        [ type_ "text"
-                        , value model.email
-                        , onInput (ContactMsg << SetEmail)
-                        ]
-                        []
-                    ]
-                ]
-            , div [ class "text-input" ]
-                [ label []
-                    [ div [] [ text "Phone:" ]
-                    , input
-                        [ type_ "text"
-                        , value model.phone
-                        , onInput (ContactMsg << SetPhone)
-                        ]
-                        []
-                    ]
-                ]
+            [ Html.map ContactMsg (viewContact model)
             , button
                 [ class "send-button"
                 , disabled (not (isValid model))
