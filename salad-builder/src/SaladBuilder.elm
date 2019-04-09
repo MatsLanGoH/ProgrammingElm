@@ -209,13 +209,18 @@ viewError error =
         Nothing ->
             text ""
 
+viewSection : String -> List (Html msg) -> Html msg
+viewSection heading children =
+    section [ class "salad-section" ]
+        (h2 [] [ text heading ] :: children)
+
+
 viewBuild : Model -> Html Msg
 viewBuild model =
     div []
         [ viewError model.error
-        , section [ class "salad-section" ]
-            [ h2 [] [ text "1. Select Base" ]
-            , label [ class "select-option" ]
+        , viewSection "1. Select Base"
+            [ label [ class "select-option" ]
                 [ input
                     [ type_ "radio"
                     , name "base"
@@ -246,9 +251,8 @@ viewBuild model =
                 , text "Spring Mix"
                 ]
             ]
-        , section [ class "salad-section" ]
-            [ h2 [] [ text "2. Select Toppings" ]
-            , label [ class "select-option" ]
+        , viewSection "2. Select Toppings"
+            [ label [ class "select-option" ]
                 [ input
                     [ type_ "checkbox"
                     , checked (Set.member (toppingToString Tomatoes) model.salad.toppings)
@@ -276,9 +280,8 @@ viewBuild model =
                 , text "Onions"
                 ]
             ]
-        , section [ class "salad-section" ]
-            [ h2 [] [ text "3. Select Dressing" ]
-            , label [ class "select-option" ]
+        , viewSection "3. Select Dressing"
+            [ label [ class "select-option" ]
                 [ input
                     [ type_ "radio"
                     , name "dressing"
@@ -319,9 +322,8 @@ viewBuild model =
                 , text "Oil and Vinegar"
                 ]
             ]
-        , section [ class "salad-section" ]
-            [ h2 [] [ text "4. Enter Contact Info" ]
-            , div [ class "text-input" ]
+        , viewSection "4. Enter Contact Info"
+            [ div [ class "text-input" ]
                 [ label []
                     [ div [] [ text "Name:" ]
                     , input
