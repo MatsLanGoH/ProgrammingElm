@@ -234,88 +234,62 @@ viewSelectToppings toppings =
         , viewToppingOption "Onions" Onions toppings
         ]
 
+viewRadioOption : String --radioName
+    -> value --selectedValue
+    -> (value -> msg) --tagger
+    -> String --optionLabel
+    -> value --value
+    -> Html msg
+viewRadioOption radioName selectedValue tagger optionLabel value =
+    label [ class "select-option" ]
+        [ input
+            [ type_ "radio"
+            , name radioName
+            , checked (value == selectedValue)
+            , onClick (tagger value)
+            ]
+            []
+        , text optionLabel
+        ]
+
+viewSelectBase : Base -> Html Msg
+viewSelectBase currentBase =
+    let
+        viewBaseOption =
+            viewRadioOption "base" currentBase (SaladMsg << SetBase)
+    in
+    div []
+        [ viewBaseOption "Lettuce" Lettuce
+        , viewBaseOption "Spinach" Spinach
+        , viewBaseOption "Spring Mix" SpringMix
+        ]
+
+viewSelectDressing : Dressing -> Html Msg
+viewSelectDressing currentDressing =
+    let
+        viewDressingOption
+            = viewRadioOption "dressing" currentDressing (SaladMsg << SetDressing)
+    in
+    div []
+        [ viewDressingOption "None" NoDressing
+        , viewDressingOption "Italian" Italian
+        , viewDressingOption "Raspberry Vinaigrette" RaspberryVinaigrette
+        , viewDressingOption "Oil and Vinegar" OilVinegar
+        ]
+
 viewBuild : Model -> Html Msg
 viewBuild model =
     div []
         [ viewError model.error
         , viewSection "1. Select Base"
-            [ label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "base"
-                    , checked (model.salad.base == Lettuce)
-                    , onClick (SaladMsg (SetBase Lettuce))
-                    ]
-                    []
-                , text "Lettuce"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "base"
-                    , checked (model.salad.base == Spinach)
-                    , onClick (SaladMsg (SetBase Spinach))
-                    ]
-                    []
-                , text "Spinach"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "base"
-                    , checked (model.salad.base == SpringMix)
-                    , onClick (SaladMsg (SetBase SpringMix))
-                    ]
-                    []
-                , text "Spring Mix"
-                ]
-            ]
+            [ viewSelectBase model.salad.base ]
         , viewSection "2. Select Toppings"
-            [ label [ class "select-option" ]
-            [ viewSelectToppings model.salad.toppings ]
+            [ label
+                [ class "select-option" ]
+                [ viewSelectToppings model.salad.toppings ]
             ]
         , viewSection "3. Select Dressing"
-            [ label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "dressing"
-                    , checked (model.salad.dressing == NoDressing)
-                    , onClick (SaladMsg (SetDressing NoDressing))
-                    ]
-                    []
-                , text "None"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "dressing"
-                    , checked (model.salad.dressing == Italian)
-                    , onClick (SaladMsg (SetDressing Italian))
-                    ]
-                    []
-                , text "Italian"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "dressing"
-                    , checked (model.salad.dressing == RaspberryVinaigrette)
-                    , onClick (SaladMsg (SetDressing RaspberryVinaigrette))
-                    ]
-                    []
-                , text "Raspberry Vinaigrette"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "radio"
-                    , name "dressing"
-                    , checked (model.salad.dressing == OilVinegar)
-                    , onClick (SaladMsg (SetDressing OilVinegar))
-                    ]
-                    []
-                , text "Oil and Vinegar"
-                ]
-            ]
+            [ viewSelectDressing model.salad.dressing ]
         , viewSection "4. Enter Contact Info"
             [ div [ class "text-input" ]
                 [ label []
