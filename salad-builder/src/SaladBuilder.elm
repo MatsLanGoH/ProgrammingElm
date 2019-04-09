@@ -214,6 +214,25 @@ viewSection heading children =
     section [ class "salad-section" ]
         (h2 [] [ text heading ] :: children)
 
+viewToppingOption : String -> Topping -> Set String -> Html Msg
+viewToppingOption toppingLabel topping toppings =
+    label [ class "select-option" ]
+        [ input
+            [ type_ "checkbox"
+            , checked (Set.member (toppingToString topping) toppings)
+            , onCheck (SaladMsg << ToggleTopping topping)
+            ]
+            []
+        , text toppingLabel
+        ]
+
+viewSelectToppings : Set String -> Html Msg
+viewSelectToppings toppings =
+    div []
+        [ viewToppingOption "Tomatoes" Tomatoes toppings
+        , viewToppingOption "Cucumbers" Cucumbers toppings
+        , viewToppingOption "Onions" Onions toppings
+        ]
 
 viewBuild : Model -> Html Msg
 viewBuild model =
@@ -253,32 +272,7 @@ viewBuild model =
             ]
         , viewSection "2. Select Toppings"
             [ label [ class "select-option" ]
-                [ input
-                    [ type_ "checkbox"
-                    , checked (Set.member (toppingToString Tomatoes) model.salad.toppings)
-                    , onCheck (SaladMsg << (ToggleTopping Tomatoes))
-                    ]
-                    []
-                , text "Tomatoes"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "checkbox"
-                    , checked (Set.member (toppingToString Cucumbers) model.salad.toppings)
-                    , onCheck (SaladMsg << (ToggleTopping Cucumbers))
-                    ]
-                    []
-                , text "Cucumbers"
-                ]
-            , label [ class "select-option" ]
-                [ input
-                    [ type_ "checkbox"
-                    , checked (Set.member (toppingToString Onions) model.salad.toppings)
-                    , onCheck (SaladMsg << (ToggleTopping Onions))
-                    ]
-                    []
-                , text "Onions"
-                ]
+            [ viewSelectToppings model.salad.toppings ]
             ]
         , viewSection "3. Select Dressing"
             [ label [ class "select-option" ]
